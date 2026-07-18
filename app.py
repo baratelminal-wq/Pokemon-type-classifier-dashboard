@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import streamlit as st
 import pandas as pd
 import joblib
@@ -10,21 +12,42 @@ import plotly.graph_objects as go
 import requests # For linking to data source
 
 # --- Configuration ---
+PROJECT_DIR = Path(__file__).resolve().parent
+
+
+def resolve_file(*paths):
+    for path in paths:
+        if path.exists():
+            return path
+    return paths[0]
+
+
 st.set_page_config(page_title="Pokémon Type Classifier Dashboard", layout="wide")
 
 # --- Caching Data and Resources ---
 @st.cache_data
 def load_data():
-    df_raw = pd.read_csv("data/raw_data.csv")
-    df_clean = pd.read_csv("data/clean_data.csv")
+    raw_path = resolve_file(PROJECT_DIR / "data" / "raw_data.csv", PROJECT_DIR / "raw_data.csv")
+    clean_path = resolve_file(PROJECT_DIR / "data" / "clean_data.csv", PROJECT_DIR / "clean_data.csv")
+
+    df_clean = pd.read_csv(clean_path)
+    if raw_path == clean_path:
+        df_raw = df_clean.copy()
+    else:
+        df_raw = pd.read_csv(raw_path)
     return df_raw, df_clean
 
 @st.cache_resource
 def load_model_artifacts():
-    model = joblib.load("model/model.pkl")
-    scaler = joblib.load("model/scaler.pkl")
-    label_encoder = joblib.load("model/label_encoder.pkl")
-    with open("model/model_metrics.json", "r") as f:
+    model_path = resolve_file(PROJECT_DIR / "model" / "model.pkl", PROJECT_DIR / "model.pkl")
+    scaler_path = resolve_file(PROJECT_DIR / "model" / "scaler.pkl", PROJECT_DIR / "scaler.pkl")
+    label_encoder_path = resolve_file(PROJECT_DIR / "model" / "label_encoder.pkl", PROJECT_DIR / "label_encoder.pkl")
+    metrics_path = resolve_file(PROJECT_DIR / "model" / "model_metrics.json", PROJECT_DIR / "model_metrics.json")
+
+    model = joblib.load(model_path)
+    scaler = joblib.load(scaler_path)
+    label_encoder = joblib.load(label_encoder_path)
+    with open(metrics_path, "r") as f:
         model_metrics = json.load(f)
     return model, scaler, label_encoder, model_metrics
 
