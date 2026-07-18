@@ -27,8 +27,8 @@ st.set_page_config(page_title="Pokémon Type Classifier Dashboard", layout="wide
 # --- Caching Data and Resources ---
 @st.cache_data
 def load_data():
-raw_path = "raw_data.csv"    
-clean_path = "clean_data.csv"
+    raw_path = "raw_data.csv" 
+    clean_path = "clean_data.csv"
     df_clean = pd.read_csv(clean_path)
     if raw_path == clean_path:
         df_raw = df_clean.copy()
